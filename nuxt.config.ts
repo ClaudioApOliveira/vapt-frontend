@@ -9,7 +9,7 @@ export default defineNuxtConfig({
   
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8080'
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || ''
     }
   },
 
@@ -17,9 +17,16 @@ export default defineNuxtConfig({
     devProxy: {
       '/api': {
         target: 'http://localhost:8080/api',
-        changeOrigin: true,
-        prependPath: true,
+        changeOrigin: true
       }
     }
   },
+
+  routeRules: {
+    '/api/**': {
+      proxy: process.env.NUXT_PUBLIC_API_BASE 
+        ? `${process.env.NUXT_PUBLIC_API_BASE}/api/**` 
+        : 'http://localhost:8080/api/**'
+    }
+  }
 })
