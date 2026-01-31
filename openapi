@@ -1,0 +1,541 @@
+---
+openapi: 3.1.0
+tags:
+- name: Autenticação
+  description: Endpoints de autenticação
+- name: Promoções
+  description: Gerenciamento de promoções e ofertas
+- name: Redes
+  description: Gerenciamento de redes de supermercados
+- name: Unidades
+  description: Gerenciamento de unidades/lojas
+components:
+  schemas:
+    ApiResponseIdResponse:
+      type: object
+      properties:
+        tracer:
+          type: string
+        timestamp:
+          $ref: "#/components/schemas/LocalDateTime"
+        data:
+          $ref: "#/components/schemas/IdResponse"
+    ApiResponseListString:
+      type: object
+      properties:
+        tracer:
+          type: string
+        timestamp:
+          $ref: "#/components/schemas/LocalDateTime"
+        data:
+          type: array
+          items:
+            type: string
+    ApiResponseTokenResponse:
+      type: object
+      properties:
+        tracer:
+          type: string
+        timestamp:
+          $ref: "#/components/schemas/LocalDateTime"
+        data:
+          $ref: "#/components/schemas/TokenResponse"
+    ErrorResponse:
+      type: object
+      properties:
+        tracer:
+          type: string
+        timestamp:
+          $ref: "#/components/schemas/LocalDateTime"
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+    IdResponse:
+      type: object
+      properties:
+        id:
+          type: string
+    LocalDateTime:
+      type: string
+      format: date-time
+      examples:
+      - 2022-03-10T12:15:50
+    LoginRequest:
+      type: object
+      required:
+      - username
+      - password
+      properties:
+        username:
+          type: string
+          pattern: \S
+        password:
+          type: string
+          pattern: \S
+    PromocaoMultiResponse:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+        total:
+          type: integer
+          format: int32
+    PromocaoRequest:
+      type: object
+      required:
+      - unidadeIds
+      properties:
+        unidadeIds:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        valorPromocaos:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValorPromocao"
+    PromocaoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        unidadeIds:
+          type: array
+          items:
+            type: string
+        nome:
+          type: string
+        descricao:
+          type: string
+        valor:
+          type: number
+        unidade:
+          type: string
+        quantidadeMedida:
+          type: integer
+          format: int32
+        inicioPromocao:
+          $ref: "#/components/schemas/LocalDateTime"
+        fimPromocao:
+          $ref: "#/components/schemas/LocalDateTime"
+        marca:
+          type: string
+        categoria:
+          type: string
+    RedeRequest:
+      type: object
+      required:
+      - nome
+      - cnpj
+      properties:
+        nome:
+          type: string
+          pattern: \S
+        cnpj:
+          type: string
+          pattern: \S
+        urlLogo:
+          type: string
+    RedeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        cnpj:
+          type: string
+        urlLogo:
+          type: string
+    RegisterRequest:
+      type: object
+      required:
+      - username
+      - password
+      - role
+      properties:
+        username:
+          type: string
+          pattern: \S
+        password:
+          type: string
+          pattern: \S
+        role:
+          $ref: "#/components/schemas/Role"
+    Role:
+      type: string
+      enum:
+      - ADMIN
+      - COMMON
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        type:
+          type: string
+        expiresIn:
+          type: integer
+          format: int64
+    UnidadeRequest:
+      type: object
+      required:
+      - redeId
+      - nomeLoja
+      - logradouro
+      - cidade
+      - estado
+      - longitude
+      - latitude
+      properties:
+        redeId:
+          type: string
+          pattern: \S
+        nomeLoja:
+          type: string
+          pattern: \S
+        logradouro:
+          type: string
+          pattern: \S
+        cidade:
+          type: string
+          pattern: \S
+        estado:
+          type: string
+          pattern: \S
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+    UnidadeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        redeId:
+          type: string
+        nomeLoja:
+          type: string
+        logradouro:
+          type: string
+        cidade:
+          type: string
+        estado:
+          type: string
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+    ValorPromocao:
+      type: object
+      required:
+      - nome
+      - valor
+      properties:
+        nome:
+          type: string
+          pattern: \S
+        descricao:
+          type: string
+        valor:
+          type: number
+          exclusiveMinimum: 0
+        unidade:
+          type: string
+        quantidadeMedida:
+          type: integer
+          format: int32
+        inicioPromocao:
+          $ref: "#/components/schemas/LocalDateTime"
+        fimPromocao:
+          $ref: "#/components/schemas/LocalDateTime"
+        marca:
+          type: string
+        categoria:
+          type: string
+  securitySchemes:
+    SecurityScheme:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Authentication
+paths:
+  /api/auth/login:
+    post:
+      summary: Login
+      description: Autentica usuário e retorna token JWT
+      tags:
+      - Autenticação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTokenResponse"
+  /api/auth/register:
+    post:
+      summary: Registrar usuário
+      description: Cadastra novo usuário admin
+      tags:
+      - Autenticação
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseIdResponse"
+  /api/promocoes:
+    post:
+      summary: Criar promoção
+      description: Cria uma nova promoção com padronização automática
+      tags:
+      - Promoções
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromocaoRequest"
+        required: true
+      responses:
+        "201":
+          description: Promoção criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromocaoMultiResponse"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/promocoes/ativas:
+    get:
+      summary: Buscar ativas
+      description: Busca todas as promoções ativas no momento
+      tags:
+      - Promoções
+      responses:
+        "200":
+          description: Lista de promoções ativas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromocaoResponse"
+  /api/promocoes/cidade/{cidade}/rede/{redeId}:
+    get:
+      summary: Buscar por cidade e rede
+      description: Busca promoções de uma rede específica em uma cidade
+      tags:
+      - Promoções
+      parameters:
+      - name: cidade
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: redeId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Lista de promoções
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromocaoResponse"
+  /api/promocoes/unidade/{unidadeId}:
+    get:
+      summary: Buscar por unidade
+      description: Busca promoções de uma unidade específica
+      tags:
+      - Promoções
+      parameters:
+      - name: unidadeId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Lista de promoções
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromocaoResponse"
+  /api/redes:
+    get:
+      summary: Listar redes
+      description: Lista todas as redes cadastradas
+      tags:
+      - Redes
+      responses:
+        "200":
+          description: Lista de redes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedeResponse"
+    post:
+      summary: Criar rede
+      description: Cria uma nova rede de supermercado
+      tags:
+      - Redes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RedeRequest"
+        required: true
+      responses:
+        "201":
+          description: Rede criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdResponse"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/redes/{id}:
+    get:
+      summary: Buscar rede
+      description: Busca uma rede por ID
+      tags:
+      - Redes
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Rede encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedeResponse"
+        "404":
+          description: Rede não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/unidades:
+    post:
+      summary: Criar unidade
+      description: Cria uma nova unidade com geolocalização
+      tags:
+      - Unidades
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnidadeRequest"
+        required: true
+      responses:
+        "201":
+          description: Unidade criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdResponse"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/unidades/cidade/{cidade}:
+    get:
+      summary: Buscar por cidade
+      description: Busca unidades por cidade
+      tags:
+      - Unidades
+      parameters:
+      - name: cidade
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Lista de unidades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnidadeResponse"
+  /api/unidades/cidades:
+    get:
+      summary: Listar cidades
+      description: Lista todas as cidades cadastradas
+      tags:
+      - Unidades
+      responses:
+        "200":
+          description: Lista de cidades
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseListString"
+  /api/unidades/{id}:
+    get:
+      summary: Buscar unidade
+      description: Busca uma unidade por ID
+      tags:
+      - Unidades
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Unidade encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnidadeResponse"
+        "404":
+          description: Unidade não encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+info:
+  title: Vapt API
+  version: 1.0.0
+  description: API reativa para conectar consumidores a ofertas locais de supermercados
