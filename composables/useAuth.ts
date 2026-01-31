@@ -16,7 +16,7 @@ const authState = reactive<AuthState>({
 
 export const useAuth = () => {
   const config = useRuntimeConfig()
-  const baseURL = import.meta.client ? '' : (config.public.apiBase || 'http://localhost:8080')
+  const baseURL = config.public.apiBase || 'http://localhost:8080'
 
   const initAuth = () => {
     if (import.meta.client) {

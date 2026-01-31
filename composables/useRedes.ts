@@ -2,7 +2,7 @@ import type { RedeResponse, RedeRequest, IdResponse } from '~/types'
 
 export const useRedes = () => {
   const config = useRuntimeConfig()
-  const baseURL = process.client ? '' : (config.public.apiBase || 'http://localhost:8080')
+  const baseURL = config.public.apiBase || 'http://localhost:8080'
   const { getAuthHeader } = useAuth()
 
   const buscarTodas = async () => {

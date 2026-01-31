@@ -2,7 +2,7 @@ import type { UnidadeResponse, UnidadeComRede, UnidadeRequest, IdResponse } from
 
 export const useUnidades = () => {
   const config = useRuntimeConfig()
-  const baseURL = process.client ? '' : (config.public.apiBase || 'http://localhost:8080')
+  const baseURL = config.public.apiBase || 'http://localhost:8080'
   const { buscarPorId: buscarRede } = useRedes()
   const { getAuthHeader } = useAuth()
 
