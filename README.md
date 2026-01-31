@@ -58,11 +58,61 @@ bun run dev
 
 Acesse `http://localhost:3000`
 
-## 🏗️ Build
+## 🏗️ Build para Produção
 
 ```bash
+# Gerar build de produção
 bun run build
+
+# Testar build localmente
 bun run preview
+```
+
+## 🚢 Deploy em Produção
+
+### Variáveis de Ambiente
+
+Configure antes do build:
+
+```bash
+NUXT_PUBLIC_API_BASE=https://api.vapt.com.br
+```
+
+### Executar com Bun
+
+```bash
+# Build
+bun run build
+
+# Executar em produção
+bun .output/server/index.mjs
+```
+
+Com porta customizada:
+
+```bash
+PORT=8080 NUXT_PUBLIC_API_BASE=https://api.vapt.com.br bun .output/server/index.mjs
+```
+
+### Docker com Bun
+
+```dockerfile
+FROM oven/bun:1-alpine
+
+WORKDIR /app
+COPY .output .output
+
+ENV NUXT_PUBLIC_API_BASE=https://api.vapt.com.br
+ENV PORT=3000
+
+EXPOSE 3000
+
+CMD ["bun", ".output/server/index.mjs"]
+```
+
+```bash
+docker build -t vapt-web .
+docker run -p 3000:3000 -e NUXT_PUBLIC_API_BASE=https://api.vapt.com.br vapt-web
 ```
 
 ## ✨ Funcionalidades
